@@ -29,7 +29,6 @@ public:
         }
     }
     Small_vector(const std::initializer_list<T> list) {
-        this->~Small_vector();
         this->capacity = this->size = list.size();
         const T* pl = list.begin();
         begin_point = new T[capacity];
@@ -62,30 +61,62 @@ public:
         }
         std::cout << '\n';
     }
+    Small_vector<T>& operator= (const Small_vector<T>& another_vector) {
+        
+        this->~Small_vector();
+        size = another_vector.size;
+        capacity = another_vector.capacity;
+        
+        begin_point = new T[capacity];
+        for (int i = 0; i < size; ++i) {
+            this->begin_point[i] = another_vector.begin_point[i];
+        }
+        return *this;
+    }
     T& operator[](unsigned index) {
         return this->begin_point[index];
+
         }
+    bool operator== (const Small_vector<T>& another_vector) {
+        if (size == another_vector.size) {
+            for (int i = 0; i < size; ++i) {
+                if (begin_point[i] != another_vector[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }      
+        return false;
+    }
     ~Small_vector() {
             delete[] begin_point;   
+    }
+};
+template<typename T>
+class Test {
+public:
+    Test<T>& operator=(const Test<T>& v) {
+        std::cout << "==========" << std::endl;
+        return *this;
     }
 };
 
 
 int main() {
-    Small_vector<int> v(3);
-    for (int i = 0; i < 10; ++i) {
-        v.push_back(i);
-    }
-    Small_vector<int> v1(v);
-    
-    Small_vector<int> v2{ 1, 2, 3 };
-    
-    
-    v.print();
-    v1.print();
-    v2.print();
+    Small_vector<int> v1(2);
+    const Small_vector<int> v2{ 1, 2, 3 };
+    Small_vector<int> v3;
+    v3 = v1 = v2;
+    const Small_vector<int> v4(v1);
 
-    const Small_vector<int> v3{ 1, 2, 3 };
-    v3.print();
+
+    for (int i = 0; i < v1.get_size();++i) {
+        ++v1[i];
+    }
+    bool tmp = v3 == v2;
+    std::cout << tmp;
+    
+    
 
     return 1;
+}
