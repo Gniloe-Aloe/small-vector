@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <string>
+#include <WinSock2.h>
 
 template<typename T>
 class Small_vector {
@@ -52,6 +53,30 @@ public:
         }
         
     }
+    void push_front(const T value) {
+        //if we have necessary allocated memory
+        if (size != capacity) {
+            ++size;
+            for (int i = size; i > 0; --i) {
+                begin_point[i] = begin_point[i - 1];
+            }
+            begin_point[0] = value;
+        }
+        else {
+            //if we have not necessary allocated memory 
+            capacity += (capacity / 2) + 1;
+
+            T* tmp = new T[capacity];
+            ++size;
+            for (int i = 0; i < size; ++i) {
+                tmp[i + 1] = this->begin_point[i];
+            }
+            
+            tmp[0] = value;
+            this->~Small_vector();
+            this->begin_point = tmp;
+        }
+    }
     int get_size() const {
         return this->size;
     }
@@ -80,16 +105,16 @@ public:
     bool operator== (const Small_vector<T>& another_vector) {
         if (size == another_vector.size) {
             for (int i = 0; i < size; ++i) {
-                if (begin_point[i] != another_vector[i]) {
-                    return false;
-                }
+                if (begin_point[i] != another_vector.begin_point[i])return false;
             }
             return true;
-        }      
-        return false;
+        }
+            return false;  
     }
     ~Small_vector() {
-            delete[] begin_point;   
+       
+            delete[] begin_point;
+        
     }
 };
 template<typename T>
@@ -103,20 +128,16 @@ public:
 
 
 int main() {
-    Small_vector<int> v1(2);
-    const Small_vector<int> v2{ 1, 2, 3 };
-    Small_vector<int> v3;
-    v3 = v1 = v2;
-    const Small_vector<int> v4(v1);
-
-
-    for (int i = 0; i < v1.get_size();++i) {
-        ++v1[i];
+    Small_vector<int> v{ 1, 2, 3 };
+    
+    for (int i = 0; i < 3; ++i) {
+        v.push_front(i);
+        v.push_back(i);
     }
-    bool tmp = v3 == v2;
-    std::cout << tmp;
     
     
-
-    return 1;
+  
+  
+    v.print();
+    return 0;
 }
