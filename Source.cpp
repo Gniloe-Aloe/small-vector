@@ -21,16 +21,11 @@ public:
     //Конструктор от списка инициализации {1, 2, 3 ..}
     Small_vector(const std::initializer_list<T> list);
 
-    //конструктор перемещения
-    Small_vector(Small_vector<T>&& another_vector) {
-      
-    }
+    //конструктор перемещения (забираем ресурсы у переданного r-value объекта)
+    Small_vector(Small_vector<T>&& another_vector) noexcept;
 
-    //оператор присваивания перемещением
-    Small_vector<T>& operator= (Small_vector<T>&& another_vector) {
-        
-        return *this;
-    }
+    //оператор присваивания перемещением (забираем ресурсы у переданного r-value объекта)
+    Small_vector<T>& operator= (Small_vector<T>&& another_vector) noexcept;
 
     //добавить элемент в конец
     void push_back(const T value);
@@ -105,6 +100,27 @@ Small_vector<T>::Small_vector(const std::initializer_list<T> list) {
     for (int i = 0; i < size; ++i) {
         this->begin_point[i] = *(pl + i);
     }
+}
+
+template<typename T>
+Small_vector<T>::Small_vector(Small_vector<T>&& another_vector) noexcept {
+    this->~Small_vector();
+    begin_point = another_vector.begin_point;
+    another_vector.begin_point = nullptr;
+    size = another_vector.size;
+    capacity = another_vector.capacity;
+    another_vector.size = another_vector.capacity = 0;
+}
+
+template<typename T>
+Small_vector<T>& Small_vector<T>::operator= (Small_vector<T>&& another_vector) noexcept {
+    this->~Small_vector();
+    begin_point = another_vector.begin_point;
+    another_vector.begin_point = nullptr;
+    size = another_vector.size;
+    capacity = another_vector.capacity;
+    another_vector.size = another_vector.capacity = 0;
+    return *this;
 }
 
 template<typename T>
@@ -232,11 +248,12 @@ void Small_vector<T>::pop_index(const int index) {
 
 int main() {
    
+    Small_vector<int> v{ 1, 2, 3 };
+    Small_vector<int> v1(std::move(v));
     
-    Small_vector<int> v1;
-    v1 = Small_vector<int>{ 1, 2 };
-    
+   
     v1.print();
+    v.print();
     
     return 0;
 }
