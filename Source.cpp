@@ -21,6 +21,17 @@ public:
     //Конструктор от списка инициализации {1, 2, 3 ..}
     Small_vector(const std::initializer_list<T> list);
 
+    //конструктор перемещения
+    Small_vector(Small_vector<T>&& another_vector) {
+      
+    }
+
+    //оператор присваивания перемещением
+    Small_vector<T>& operator= (Small_vector<T>&& another_vector) {
+        
+        return *this;
+    }
+
     //добавить элемент в конец
     void push_back(const T value);
 
@@ -37,17 +48,8 @@ public:
     void pop_index(const int index);
 
     //добавление перед элементом под переданным индексом
-    void push_index(const int index) {
-        //если у нас достаточно выделенной памяти для добавления
-        if (size != capacity) {
-            
-        }
-        //если для добавления нужно выделить память
-        else {
-
-        }
-    }
-    
+    void push_index(const int index, const T value);
+     
     //вернуть количество элементов в векторе
     int get_size() const { return this->size; }
     
@@ -62,6 +64,9 @@ public:
  
     //вектора равны, если содержат одинаковую последовательность элементов
     bool operator== (const Small_vector<T>& another_vector) const;
+
+    //обратный оператор
+    bool operator!= (const Small_vector<T>& another_vector)const { return !this->operator==(another_vector); }
 
     //удаление указателя на nullptr допустимо
     ~Small_vector() { delete[] begin_point; }
@@ -118,6 +123,35 @@ void Small_vector<T>::push_back(const T value) {
         this->begin_point[size++] = value;
     }
 
+}
+
+template<typename T>
+void Small_vector<T>::push_index(const int index, const T value) {
+    //если у нас достаточно выделенной памяти для добавления
+    if (size != capacity) {
+        ++size;
+        for (int i = size; i > index; --i) {
+            begin_point[i] = begin_point[i - 1];
+        }
+        begin_point[index] = value;
+    }
+    //если для добавления нужно выделить память
+    else {
+        ++size;
+        capacity += (capacity / 2) + 1;
+        T* tmp = new T[capacity];
+        // сдвигаем всё, что справа от индекса
+        for (int i = size; i > index; --i) {
+            tmp[i] = begin_point[i - 1];
+        }
+        //копируем всё, что слева от индекса
+        for (int i = 0; i < index; ++i) {
+            tmp[i] = begin_point[i];
+        }
+        tmp[index] = value;
+        this->~Small_vector();
+        begin_point = tmp;
+    }
 }
 
 template<typename T>
@@ -199,17 +233,10 @@ void Small_vector<T>::pop_index(const int index) {
 int main() {
    
     
-    Small_vector<int> v1{ 1, 2, 3 };
+    Small_vector<int> v1;
+    v1 = Small_vector<int>{ 1, 2 };
     
-    
-    for (int i = 0; i < 1000; ++i) {
-        v1.push_back(i);
-        v1.pop_front();
-        v1.push_front(i);
-        v1.pop_back();
-    }
-  
-  
     v1.print();
+    
     return 0;
 }
