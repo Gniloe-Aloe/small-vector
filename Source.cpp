@@ -1,9 +1,5 @@
 ﻿#include <iostream>
-#include <string>
 #include <algorithm>
-
-
-
 
 
 template<typename T>
@@ -50,22 +46,22 @@ public:
     void push_index(const int index, const T value);
      
     //вернуть количество элементов в векторе
-    int get_size() const { return this->size; }
+    int get_size() const noexcept { return this->size; }
     
     //распечатать вектор
-    void print() const;
+    void print() const noexcept;
     
     //Перегрузка оператораа присваивания
     Small_vector<T>& operator= (const Small_vector<T>& another_vector);
     
     //доступ по индексу
-    T& operator[](unsigned index) const { return this->begin_point[index]; }
+    T& operator[](unsigned index) const noexcept { return this->begin_point[index]; }
  
     //вектора равны, если содержат одинаковую последовательность элементов
-    bool operator== (const Small_vector<T>& another_vector) const;
+    bool operator== (const Small_vector<T>& another_vector) const noexcept;
 
     //обратный оператор
-    bool operator!= (const Small_vector<T>& another_vector)const { return !this->operator==(another_vector); }
+    bool operator!= (const Small_vector<T>& another_vector)const noexcept { return !this->operator==(another_vector); }
 
     //удаление указателя на nullptr допустимо
     ~Small_vector() { delete[] begin_point; }
@@ -285,7 +281,7 @@ void Small_vector<T>::push_front(const T value) {
 }
 
 template<typename T>
-void Small_vector<T>::print() const {
+void Small_vector<T>::print() const noexcept {
     for (int i = 0; i < size; ++i) {
         std::cout << begin_point[i] << '\t';
     }
@@ -307,7 +303,7 @@ Small_vector<T>& Small_vector<T>::operator= (const Small_vector<T>& another_vect
 }
 
 template<typename T>
-bool Small_vector<T>::operator== (const Small_vector<T>& another_vector) const {
+bool Small_vector<T>::operator== (const Small_vector<T>& another_vector) const noexcept {
     if (size == another_vector.size) {
         for (int i = 0; i < size; ++i) {
             if (begin_point[i] != another_vector.begin_point[i])return false;
