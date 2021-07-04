@@ -1,6 +1,10 @@
 ﻿#include <iostream>
 #include <string>
-#include <WinSock2.h>
+#include <algorithm>
+
+
+
+
 
 template<typename T>
 class Small_vector {
@@ -65,8 +69,92 @@ public:
 
     //удаление указателя на nullptr допустимо
     ~Small_vector() { delete[] begin_point; }
+
+    
+private:
+    //==========================Класс итератора для нашего Small_vector==========================
+    template<typename T>
+    class OwnIterator {
+        //итератор имеет доступ к приватным полям контейнера
+        friend class Small_vector;
+    public:
+        //стандартизирование названий для интеграции
+        // "typedef Iter iterator_type" == "using iterator_type = Iter" - C++11
+        using iterator_type = T;
+        using iterator_category = std::input_iterator_tag;
+        using value_type = iterator_type;
+        using difference_type = std::ptrdiff_t;
+        using reference = iterator_type&;
+        using pointer = iterator_type*;
+        
+        //указатель на данные в нашем контейнере
+        iterator_type* value;
+    private:
+        //приватный конструктр итератора от указателя
+        OwnIterator(iterator_type* point) :value(point) {}
+    public:
+
+        //конструктор копирования от другого итератора
+        OwnIterator(const OwnIterator& another_iterator) : value(another_iterator.value){}
+
+        //оператор сравнения
+        bool operator!=(OwnIterator const& other)const {
+            return value != other.value;
+        }
+
+        //обратный оператор 
+        bool operator==(OwnIterator const& other)const {
+            return value == other.value;
+        }
+
+        //оператор разыменования
+        typename OwnIterator::reference operator*()const { return *value; }
+
+        //префиксный инкремент
+        OwnIterator& operator++() {
+            ++value;
+            return *this;
+        }
+
+        //постфиксный инкремент
+        const OwnIterator operator++(int) {
+            OwnIterator tmp(*this);
+            ++value;
+            return tmp;
+        }
+
+        //префиксный декремент
+        OwnIterator& operator--() {
+            --value;
+            return *this;
+        }
+
+        //постфиксный декремент
+        const OwnIterator operator--(int) {
+            OwnIterator tmp(*this);
+            --value;
+            return tmp;
+        }
+    };
+public:
+    //стандартизирование названий для интеграции
+    using iterator = OwnIterator<T>;
+    using const_iterator = OwnIterator<const T>;
+
+    //возвращение итератора на первый элемент
+    iterator begin() { return iterator(&begin_point[0]); }
+    
+    //возвращение итератора на элемент за последним
+    iterator end() { return iterator(&begin_point[size]); }
+
+    //возвращение константного итератора на первый элемент
+    const_iterator begin()const { return const_iterator(begin_point[0]); }
+    
+    //возвращение константного итератора на элемент за последним
+    const_iterator end()const { return const_iterator(begin_point[size]); } 
 };
 
+//методы и перегрузки Small_vector:
 template<typename T>
 Small_vector<T>::Small_vector() {
     begin_point = nullptr;
@@ -246,14 +334,49 @@ void Small_vector<T>::pop_index(const int index) {
 }
 
 
-int main() {
-   
-    Small_vector<int> v{ 1, 2, 3 };
-    Small_vector<int> v1(std::move(v));
+int main() { 
+    //тестирование Small_vector:
+    Small_vector<int> v;
+    const Small_vector<int> v0{ 0, 0, 0 };
+    Small_vector<int> v1(v0);
+    Small_vector<int> v2(10);
+    Small_vector<int> v3(std::move(v1));
+    Small_vector<int> v4 = v3;
+ 
     
-   
-    v1.print();
-    v.print();
-    
+
+    for (int i = 0; i < 10; ++i) {
+        v2.push_back(i);
+    }
+    for (int i = 0; i < 10; ++i) {
+        v2.push_front(i);
+    }
+    for (int i = 0; i < 10; ++i) {
+        v2.pop_front();
+    }
+
+
+    for (int i = 0; i < 10; ++i) {
+        v4.push_index(2, 100);
+    }
+    for (int i = 0; i < 10; ++i) {
+        v4.pop_index(1);
+    }
+
+
+
+    v0.print();
+
+    for (auto& it : v2) {
+        std::cout << it << '\t';
+    }
+    std::cout << '\n';
+
+    for (int i = 0; i < v4.get_size(); ++i) {
+        std::cout << v4[i] << '\t';
+    }
+    std::cout << '\n';
+
+
     return 0;
 }
